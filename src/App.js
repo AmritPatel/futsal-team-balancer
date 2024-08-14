@@ -6,21 +6,21 @@ import './App.css';
 
 function App() {
   const initialPlayers = [
-    { name: "Mironel", position: "D", rating: 5 },
-    { name: "Anish", position: "M", rating: 5 },
+    { name: "Mironel", position: "E", rating: 5 },
+    { name: "Anish", position: "E", rating: 5 },
     { name: "Amrit", position: "E", rating: 5 },
     { name: "Anders", position: "E", rating: 5 },
-    { name: "Saugat", position: "M", rating: 5 },
+    { name: "Saugat", position: "E", rating: 5 },
     { name: "Sujan", position: "E", rating: 5 },
-    { name: "Tancho", position: "M", rating: 5 },
-    { name: "Yoshi", position: "F", rating: 5 },
+    { name: "Tancho", position: "E", rating: 5 },
+    { name: "Yoshi", position: "E", rating: 5 },
     { name: "Sandip", position: "E", rating: 5 },
-    { name: "Adrian", position: "F", rating: 5 },
-    { name: "Akki", position: "F", rating: 5 },
+    { name: "Adrian", position: "E", rating: 5 },
+    { name: "Akki", position: "E", rating: 5 },
     { name: "Diwas", position: "E", rating: 5 },
     { name: "Rajesh", position: "E", rating: 5 },
-    { name: "Mike", position: "F", rating: 5 },
-    { name: "Pranab", position: "G", rating: 5 }
+    { name: "Mike", position: "E", rating: 5 },
+    { name: "Pranab", position: "E", rating: 5 }
   ];
 
   const [players, setPlayers] = useState(initialPlayers);
