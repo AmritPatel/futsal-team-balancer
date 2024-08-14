@@ -17,6 +17,22 @@ function App() {
   const [canRandomize, setCanRandomize] = useState(true);
   const [isDescriptionCollapsed, setIsDescriptionCollapsed] = useState(true);
 
+  // Update the number of players and ensure data preservation
+  const handleNumPlayersChange = (newNumPlayers) => {
+    if (newNumPlayers > players.length) {
+      const additionalPlayers = Array.from({ length: newNumPlayers - players.length }, () => ({
+        id: uuidv4(),
+        name: '',
+        position: 'E',
+        rating: 5,
+      }));
+      setPlayers((prevPlayers) => [...prevPlayers, ...additionalPlayers]);
+    } else {
+      setPlayers((prevPlayers) => prevPlayers.slice(0, newNumPlayers));
+    }
+    setNumPlayers(newNumPlayers);
+  };
+
   const generatePlayerData = () => {
     const newPlayers = Array.from({ length: numPlayers }, () => ({
       id: uuidv4(),
@@ -200,7 +216,7 @@ function App() {
             <p>This app helps you balance futsal teams based on player ratings and positions.</p>
             <p>You can edit the player data in the table below, and then click 'Recalculate Teams' to distribute players into balanced teams.</p>
             <p>The app optimizes the teams to minimize the variance in average team ratings while ensuring that each team has a good mix of player positions.</p>
-            <p>If a team doesn't have at least one natural goalkeeper (G) or defender (D), it will be ensured that the team has at least two 'E' (everything) players to maintain balance.</p>
+            <p>If a team doesn't have at least one natural goalkeeper (G) or defender (D), it will be ensured that the team has at least flexible (E) players to maintain balance.</p>
           </div>
         </div>
       </div>
@@ -211,31 +227,27 @@ function App() {
           type="number"
           id="numPlayers"
           value={numPlayers}
-          onChange={(e) => setNumPlayers(parseInt(e.target.value, 10))}
+          onChange={(e) => handleNumPlayersChange(parseInt(e.target.value, 10))}
           min="1"
           className="form-control"
         />
       </div>
 
-      <div className="mb-3">
-        <label htmlFor="numTeams">Number of Teams:</label>
-        <input
-          type="number"
-          id="numTeams"
-          value={numTeams}
-          onChange={(e) => setNumTeams(parseInt(e.target.value, 10))}
-          min="2"
-          className="form-control"
-        />
-      </div>
-
-      <button className="btn btn-primary mb-3" onClick={generatePlayerData}>
-        Generate Players
-      </button>
-
       {players.length > 0 && (
         <>
           <PlayerTable players={players} setPlayers={handlePlayerChange} showDetails={true} />
+
+          <div className="mb-3">
+            <label htmlFor="numTeams">Number of Teams:</label>
+            <input
+              type="number"
+              id="numTeams"
+              value={numTeams}
+              onChange={(e) => setNumTeams(parseInt(e.target.value, 10))}
+              min="2"
+              className="form-control"
+            />
+          </div>
 
           <div className="d-flex flex-wrap mt-3">
             <button className="btn btn-primary mr-2" onClick={calculateTeams}>
