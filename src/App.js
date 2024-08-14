@@ -6,9 +6,14 @@ import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 
 function App() {
-  const [numPlayers, setNumPlayers] = useState(0);
+  const [numPlayers, setNumPlayers] = useState(10);
   const [numTeams, setNumTeams] = useState(3);
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState(Array.from({ length: 10 }, () => ({
+    id: uuidv4(),
+    name: '',
+    position: 'E',
+    rating: 5,
+  })));
   const [previousPlayers, setPreviousPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [currentVariance, setCurrentVariance] = useState(Infinity);
@@ -16,8 +21,8 @@ function App() {
   const [showDetails, setShowDetails] = useState(false);
   const [canRandomize, setCanRandomize] = useState(true);
   const [isDescriptionCollapsed, setIsDescriptionCollapsed] = useState(true);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
 
-  // Update the number of players and ensure data preservation
   const handleNumPlayersChange = (newNumPlayers) => {
     if (newNumPlayers > players.length) {
       const additionalPlayers = Array.from({ length: newNumPlayers - players.length }, () => ({
@@ -33,19 +38,10 @@ function App() {
     setNumPlayers(newNumPlayers);
   };
 
-  const generatePlayerData = () => {
-    const newPlayers = Array.from({ length: numPlayers }, () => ({
-      id: uuidv4(),
-      name: '',
-      position: 'E',
-      rating: 5,
-    }));
-    setPlayers(newPlayers);
-    setTeams([]);
-    setCurrentVariance(Infinity);
-    setMessage('');
-    setCanRandomize(true);
-  };
+  const incrementPlayers = () => handleNumPlayersChange(numPlayers + 1);
+  const decrementPlayers = () => handleNumPlayersChange(numPlayers > 1 ? numPlayers - 1 : 1);
+
+  const toggleTableCollapse = () => setIsTableCollapsed(!isTableCollapsed);
 
   const calculateTeams = () => {
     if (players.length === 0) {
@@ -76,7 +72,6 @@ function App() {
       temperature *= coolingRate;
     }
 
-    // Update teams only if variance decreases or stays the same
     if (bestVariance <= currentVariance) {
       setTeams(bestTeams);
       setCurrentVariance(bestVariance);
@@ -98,7 +93,7 @@ function App() {
       const randomizedPlayers = players.map(player => ({ ...player, rating: 5 }));
       setPlayers(randomizedPlayers);
       resetOptimization();
-      setCanRandomize(false); // Prevent consecutive randomizations without changes
+      setCanRandomize(false);
     }
   };
 
@@ -106,14 +101,14 @@ function App() {
     if (previousPlayers.length > 0) {
       setPlayers(previousPlayers);
       resetOptimization();
-      setCanRandomize(true); // Allow randomization again after undo
+      setCanRandomize(true);
     }
   };
 
   const handlePlayerChange = (newPlayers) => {
     setPlayers(newPlayers);
     resetOptimization();
-    setCanRandomize(true); // Allow randomization after changes
+    setCanRandomize(true);
   };
 
   const toggleDescriptionCollapse = () => {
@@ -128,10 +123,9 @@ function App() {
     }, 0);
 
     const average = totalRating / team.length;
-    return isNaN(average) ? 0 : average;  // Ensure that a valid number is returned
+    return isNaN(average) ? 0 : average;
   };
 
-  // Generate initial teams based on player data
   const generateInitialTeams = () => {
     let shuffledPlayers = shuffleArray(players);
     const teamSize = Math.ceil(players.length / numTeams);
@@ -144,7 +138,6 @@ function App() {
     return teams;
   };
 
-  // Helper function to shuffle an array
   const shuffleArray = (array) => {
     const clonedArray = [...array];
     for (let i = clonedArray.length - 1; i > 0; i--) {
@@ -154,14 +147,12 @@ function App() {
     return clonedArray;
   };
 
-  // Calculate variance of average team ratings
   const calculateVariance = (teams) => {
     const averages = teams.map(calculateAverageRating);
     const meanRating = averages.reduce((acc, avg) => acc + avg, 0) / teams.length;
     return averages.reduce((acc, avg) => acc + Math.pow(avg - meanRating, 2), 0) / teams.length;
   };
 
-  // Swap players between teams to optimize distribution
   const swapPlayers = (teams) => {
     const teamIndex1 = Math.floor(Math.random() * teams.length);
     const teamIndex2 = (teamIndex1 + Math.floor(Math.random() * (teams.length - 1)) + 1) % teams.length;
@@ -175,7 +166,6 @@ function App() {
     return newTeams;
   };
 
-  // Check if a team meets the position constraints
   const checkPositionConstraints = (team) => {
     const positions = team.map(player => player.position);
     const hasGorD = positions.some(pos => pos === 'G' || pos === 'D');
@@ -184,7 +174,6 @@ function App() {
     return hasGorD || ECount >= 2;
   };
 
-  // Check if high-rated players (8, 9, 10) are evenly distributed
   const isHighRatedPlayerSpreadEven = (teams) => {
     const highRatedCounts = teams.map(team =>
       team.filter(player => player.rating >= 8).length
@@ -216,67 +205,73 @@ function App() {
             <p>This app helps you balance futsal teams based on player ratings and positions.</p>
             <p>You can edit the player data in the table below, and then click 'Recalculate Teams' to distribute players into balanced teams.</p>
             <p>The app optimizes the teams to minimize the variance in average team ratings while ensuring that each team has a good mix of player positions.</p>
-            <p>If a team doesn't have at least one natural goalkeeper (G) or defender (D), it will be ensured that the team has at least flexible (E) players to maintain balance.</p>
+            <p>If a team doesn't have at least one natural goalkeeper (G) or defender (D), it will be ensured that the team has at least two 'E' (everything) players to maintain balance.</p>
           </div>
         </div>
       </div>
 
       <div className="mb-3">
-        <label htmlFor="numPlayers">Number of Players:</label>
+        <label>Number of Players:</label>
+        <div className="input-group mb-3">
+          <button className="btn btn-outline-secondary" onClick={decrementPlayers}>-</button>
+          <input
+            type="number"
+            value={numPlayers}
+            readOnly
+            className="form-control"
+          />
+          <button className="btn btn-outline-secondary" onClick={incrementPlayers}>+</button>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <button className="btn btn-secondary" onClick={toggleTableCollapse}>
+          {isTableCollapsed ? "Show Player Input Table" : "Hide Player Input Table"}
+        </button>
+      </div>
+
+      {!isTableCollapsed && (
+        <PlayerTable players={players} setPlayers={handlePlayerChange} showDetails={true} />
+      )}
+
+      <div className="mb-3">
+        <label htmlFor="numTeams">Number of Teams:</label>
         <input
           type="number"
-          id="numPlayers"
-          value={numPlayers}
-          onChange={(e) => handleNumPlayersChange(parseInt(e.target.value, 10))}
-          min="1"
+          id="numTeams"
+          value={numTeams}
+          onChange={(e) => setNumTeams(parseInt(e.target.value, 10))}
+          min="2"
           className="form-control"
         />
       </div>
 
-      {players.length > 0 && (
-        <>
-          <PlayerTable players={players} setPlayers={handlePlayerChange} showDetails={true} />
+      <div className="d-flex flex-wrap mt-3">
+        <button className="btn btn-primary mr-2" onClick={calculateTeams}>
+          Recalculate Teams
+        </button>
+        <button className="btn btn-secondary mr-2" onClick={resetOptimization}>
+          Re-initialize Teams
+        </button>
+        <button className="btn btn-warning mr-2" onClick={randomizeTeams} disabled={!canRandomize}>
+          Random Teams
+        </button>
+        <button className="btn btn-danger" onClick={undoRandomTeams}>
+          Undo Random Teams
+        </button>
+      </div>
 
-          <div className="mb-3">
-            <label htmlFor="numTeams">Number of Teams:</label>
-            <input
-              type="number"
-              id="numTeams"
-              value={numTeams}
-              onChange={(e) => setNumTeams(parseInt(e.target.value, 10))}
-              min="2"
-              className="form-control"
-            />
-          </div>
-
-          <div className="d-flex flex-wrap mt-3">
-            <button className="btn btn-primary mr-2" onClick={calculateTeams}>
-              Recalculate Teams
-            </button>
-            <button className="btn btn-secondary mr-2" onClick={resetOptimization}>
-              Re-initialize Teams
-            </button>
-            <button className="btn btn-warning mr-2" onClick={randomizeTeams} disabled={!canRandomize}>
-              Random Teams
-            </button>
-            <button className="btn btn-danger" onClick={undoRandomTeams}>
-              Undo Random Teams
-            </button>
-          </div>
-
-          <div className="form-check mt-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              checked={showDetails}
-              onChange={() => setShowDetails(!showDetails)}
-            />
-            <label className="form-check-label">
-              Show Position, Rating, Team Columns in Output
-            </label>
-          </div>
-        </>
-      )}
+      <div className="form-check mt-3">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          checked={showDetails}
+          onChange={() => setShowDetails(!showDetails)}
+        />
+        <label className="form-check-label">
+          Show Position and Rating columns in output
+        </label>
+      </div>
 
       {message && (
         <p className="text-danger font-weight-bold mt-3">
