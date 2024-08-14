@@ -1,3 +1,7 @@
+# Futsal Team Balancer
+
+A first app designed by me and but built in collaboration with AI!
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
