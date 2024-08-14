@@ -1,36 +1,33 @@
 import React from 'react';
 
-function TeamDisplay({ teams, showDetails, calculateAverageRating }) {
-  const renderTeam = (team, teamIndex) => (
-    <div key={teamIndex}>
-      <h4>Team {teamIndex + 1}</h4>
-      <p className="average-rating">Average Rating: {calculateAverageRating(team).toFixed(2)}</p>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>Player Name</th>
-            {showDetails && <th>Position</th>}
-            {showDetails && <th>Rating</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {team.map((player, index) => (
-            <tr key={index}>
-              <td>{player.name}</td>
-              {showDetails && <td>{player.position}</td>}
-              {showDetails && <td>{player.rating}</td>}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
+const TeamDisplay = ({ teams, showDetails, calculateAverageRating }) => {
   return (
-    <div className="team-display mt-4">
-      {teams.length > 0 ? teams.map((team, index) => renderTeam(team, index)) : <p>No teams to display.</p>}
+    <div className="mt-3">
+      {teams.map((team, index) => (
+        <div key={index} className="mb-4">
+          <h4>Team {index + 1} - Average Rating: {calculateAverageRating(team).toFixed(2)}</h4>
+          <table className="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Name</th>
+                {showDetails && <th>Position</th>}
+                {showDetails && <th>Rating</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {team.map((player) => (
+                <tr key={player.id}>
+                  <td>{player.name}</td>
+                  {showDetails && <td>{player.position}</td>}
+                  {showDetails && <td>{player.rating}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
-}
+};
 
 export default TeamDisplay;

@@ -1,47 +1,107 @@
 import React from 'react';
+import { useTable } from 'react-table';
 
-function PlayerTable({ players, setPlayers }) {
-  const handleInputChange = (index, field, value) => {
-    const updatedPlayers = [...players];
-    updatedPlayers[index][field] = field === 'rating' ? parseInt(value, 10) : value;
-    setPlayers(updatedPlayers);
+const PlayerTable = ({ players, setPlayers, showDetails }) => {
+
+  const handleInputChange = (rowId, columnId, value) => {
+    setPlayers((prevPlayers) =>
+      prevPlayers.map((player) =>
+        player.id === rowId ? { ...player, [columnId]: value } : player
+      )
+    );
   };
 
+  const renderEditable = (cell) => {
+    return (
+      <input
+        value={cell.value || ''}
+        onChange={(e) => handleInputChange(cell.row.original.id, cell.column.id, e.target.value)}
+        style={{ width: '100%' }}
+      />
+    );
+  };
+
+  const renderPositionDropdown = (cell) => {
+    return (
+      <select
+        value={cell.value || 'E'}
+        onChange={(e) => handleInputChange(cell.row.original.id, cell.column.id, e.target.value)}
+        style={{ width: '100%' }}
+      >
+        <option value="E">Everything (E)</option>
+        <option value="D">Defender (D)</option>
+        <option value="M">Midfielder (M)</option>
+        <option value="F">Forward (F)</option>
+        <option value="G">Goalkeeper (G)</option>
+      </select>
+    );
+  };
+
+  const columns = React.useMemo(() => {
+    const baseColumns = [
+      {
+        Header: 'Name',
+        accessor: 'name',
+        Cell: renderEditable,
+      }
+    ];
+
+    if (showDetails) {
+      baseColumns.push(
+        {
+          Header: 'Position',
+          accessor: 'position',
+          Cell: renderPositionDropdown,
+        },
+        {
+          Header: 'Rating',
+          accessor: 'rating',
+          Cell: renderEditable,
+        }
+      );
+    }
+
+    return baseColumns;
+  }, [showDetails]);
+
+  const data = React.useMemo(() => players, [players]);
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = useTable({
+    columns,
+    data,
+  });
+
   return (
-    <table className="table table-bordered">
+    <table {...getTableProps()} className="table table-striped table-bordered">
       <thead>
-        <tr>
-          <th>Player</th>
-          <th>Position</th>
-          <th>Rating</th>
-        </tr>
-      </thead>
-      <tbody>
-        {players.map((player, index) => (
-          <tr key={index}>
-            <td><input
-              type="text"
-              value={player.name}
-              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-              className="form-control"
-            /></td>
-            <td><input
-              type="text"
-              value={player.position}
-              onChange={(e) => handleInputChange(index, 'position', e.target.value)}
-              className="form-control"
-            /></td>
-            <td><input
-              type="number"
-              value={player.rating}
-              onChange={(e) => handleInputChange(index, 'rating', e.target.value)}
-              className="form-control"
-            /></td>
+        {headerGroups.map(headerGroup => (
+          <tr {...headerGroup.getHeaderGroupProps()}>
+            {headerGroup.headers.map(column => (
+              <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+            ))}
           </tr>
         ))}
+      </thead>
+      <tbody {...getTableBodyProps()}>
+        {rows.map(row => {
+          prepareRow(row);
+          return (
+            <tr {...row.getRowProps()}>
+              {row.cells.map(cell => (
+                <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+              ))}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
-}
+};
 
 export default PlayerTable;
