@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/futsal-team-balancer/static/css/main.d05fed38.css",
-    "main.js": "/futsal-team-balancer/static/js/main.22748601.js",
+    "main.js": "/futsal-team-balancer/static/js/main.4c650a5d.js",
     "static/js/453.58b31d9c.chunk.js": "/futsal-team-balancer/static/js/453.58b31d9c.chunk.js",
     "index.html": "/futsal-team-balancer/index.html",
     "main.d05fed38.css.map": "/futsal-team-balancer/static/css/main.d05fed38.css.map",
-    "main.22748601.js.map": "/futsal-team-balancer/static/js/main.22748601.js.map",
+    "main.4c650a5d.js.map": "/futsal-team-balancer/static/js/main.4c650a5d.js.map",
     "453.58b31d9c.chunk.js.map": "/futsal-team-balancer/static/js/453.58b31d9c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d05fed38.css",
-    "static/js/main.22748601.js"
+    "static/js/main.4c650a5d.js"
   ]
 }
