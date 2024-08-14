@@ -1,9 +1,10 @@
 import React from 'react';
 
-function TeamDisplay({ teams, showDetails }) {
+function TeamDisplay({ teams, showDetails, calculateAverageRating }) {
   const renderTeam = (team, teamIndex) => (
     <div key={teamIndex}>
       <h4>Team {teamIndex + 1}</h4>
+      <p className="average-rating">Average Rating: {calculateAverageRating(team)}</p>
       <table className="table table-bordered">
         <tbody>
           {team.map((player, index) => (
