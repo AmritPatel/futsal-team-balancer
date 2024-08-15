@@ -22,6 +22,7 @@ function App() {
   const [canRandomize, setCanRandomize] = useState(true);
   const [isDescriptionCollapsed, setIsDescriptionCollapsed] = useState(true);
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
+  const [namesText, setNamesText] = useState("");
 
   const handleNumPlayersChange = (newNumPlayers) => {
     if (newNumPlayers > players.length) {
@@ -42,6 +43,22 @@ function App() {
   const decrementPlayers = () => handleNumPlayersChange(numPlayers > 1 ? numPlayers - 1 : 1);
 
   const toggleTableCollapse = () => setIsTableCollapsed(!isTableCollapsed);
+
+  const handleNamesTextChange = (e) => {
+    setNamesText(e.target.value);
+  };
+
+  const populateTableFromNames = () => {
+    const nameLines = namesText.split('\n').filter(line => line.trim() !== '');
+    const parsedNames = nameLines.map(line => {
+      const name = line.replace(/^\d+\.\s*/, '').trim();
+      return { id: uuidv4(), name, position: 'E', rating: 5 };
+    });
+
+    setPlayers(parsedNames);
+    setNumPlayers(parsedNames.length);
+    setNamesText("");
+  };
 
   const calculateTeams = () => {
     if (players.length === 0) {
@@ -184,15 +201,24 @@ function App() {
     return (maxCount - minCount) <= 1;
   };
 
+  const copyNamesToClipboard = () => {
+    const formattedNames = teams.map((team, index) => {
+      const teamHeader = `Team ${index + 1}`;
+      const teamNames = team.map(player => player.name).join('\n');
+      return `${teamHeader}\n${teamNames}`;
+    }).join('\n\n');
+
+    navigator.clipboard.writeText(formattedNames)
+      .then(() => alert("Team names copied to clipboard!"))
+      .catch(err => console.error("Error copying to clipboard:", err));
+  };
+
   return (
     <div className="App container">
       <h1>Futsal Team Balancer</h1>
 
-      <p className="warning">
-        ⚠️ Toggle off the player rating and position before copying/pasting to the group chat!
-      </p>
-      <p className="info">
-        Keep all player ratings the same to create random teams balanced only by natural position.
+      <p className="info text-primary font-weight-bold">
+        ℹ️ Keep all player ratings the same to create random teams balanced only by position.
       </p>
 
       <div className="mb-3">
@@ -222,6 +248,21 @@ function App() {
           />
           <button className="btn btn-outline-secondary" onClick={incrementPlayers}>+</button>
         </div>
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="namesText">Paste Names (Numbered List):</label>
+        <textarea
+          id="namesText"
+          value={namesText}
+          onChange={handleNamesTextChange}
+          placeholder="1. Name1\n2. Name2\n3. Name3..."
+          className="form-control"
+          rows="4"
+        />
+        <button className="btn btn-primary mt-2" onClick={populateTableFromNames}>
+          Populate Table
+        </button>
       </div>
 
       <div className="mb-3">
@@ -261,6 +302,12 @@ function App() {
         </button>
       </div>
 
+			{message && (
+				<p className="text-danger font-weight-bold mt-3">
+					{message}
+				</p>
+			)}
+
       <div className="form-check mt-3">
         <input
           className="form-check-input"
@@ -269,18 +316,17 @@ function App() {
           onChange={() => setShowDetails(!showDetails)}
         />
         <label className="form-check-label">
-          Show Position and Rating columns in output
+          Show Position, Rating, Team Columns in Output
         </label>
       </div>
 
-      {message && (
-        <p className="text-danger font-weight-bold mt-3">
-          {message}
-        </p>
-      )}
-
       {teams.length > 0 && (
-        <TeamDisplay teams={teams} showDetails={showDetails} calculateAverageRating={calculateAverageRating} />
+        <>
+          <button className="btn btn-info mt-3" onClick={copyNamesToClipboard}>
+            Copy Names to Clipboard
+          </button>
+          <TeamDisplay teams={teams} showDetails={showDetails} calculateAverageRating={calculateAverageRating} />
+        </>
       )}
     </div>
   );
